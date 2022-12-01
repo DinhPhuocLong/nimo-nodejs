@@ -59,24 +59,53 @@ profile.setPreference("permissions.default.image", 2) ;
 
 
 (async () => {
-    const driver = new Builder()
+    this.driver = new Builder()
         .forBrowser('firefox')
         .setFirefoxOptions(profile)
         .build()
-    await driver.get(process.env.START_UP_LINK);
-    await (await driver.wait(until.elementLocated(By.xpath('/html/body/div[2]/div[1]/div/div[2]/div/div[2]/button')),15000)).click();
-    await (await driver.wait(until.elementLocated(By.className('nimo-area-code')), 15000, 'Looking for element')).click();
-    const areacode = await driver.wait(until.elementLocated(By.xpath(`//div[text()=${process.env.COUNTRY_CODE}]`)),15000);
-    await driver.executeScript("arguments[0].click();", areacode);
-    const userNameInput = driver.wait(until.elementLocated(By.className('phone-number-input')), 15000, 'Looking for element');
-    const passwordInput = await driver.wait(until.elementLocated(By.xpath('/html/body/div[6]/div/div[2]/div/div[2]/div/div/div[3]/div[1]/div[3]/input')),15000);
-    await userNameInput.sendKeys(process.env.NIMO_USERNAME);
-    await passwordInput.sendKeys(process.env.NIMO_PASSWORD);
-    await driver.actions().sendKeys(Key.ENTER).perform();
+        this.findByXpath = async function(xpath) {
+            await this.driver.wait(until.elementLocated(By.xpath(xpath)),15000);
+            return  this.driver.findElement(By.xpath(xpath));
+        }
+        this.findById = async function (id) {
+            await this.driver.wait(until.elementLocated(By.id(id)), 15000, 'Looking for element');
+            return await this.driver.findElement(By.id(id));
+        }
+        this.findByName = async function(name) {
+            await this.driver.wait(until.elementLocated(By.className(name)), 15000, 'Looking for element');
+            return await this.driver.findElement(By.className(name))
+        };
+        this.findListElementByName = async function(name) {
+            await this.driver.wait(until.elementLocated(By.className(name)), 15000, 'Looking for element');
+            return await this.driver.findElements(By.className(name))
+        };
+        this.findByCss = async function(css) {
+            return await this.driver.findElements(By.css(css));
+        }
+        this.write = async function (element, text) {
+            return await element.sendKeys(text);
+        };
+        this.sendTab = async function() {
+            return await this.driver.actions().sendKeys(Key.TAB).perform();
+        };
+        this.sendEnter = async function() {
+            return await this.driver.actions().sendKeys(Key.ENTER).perform();
+        }
+    await this.driver.get(process.env.START_UP_LINK);
+    await(await this.findByXpath('/html/body/div[2]/div[1]/div/div[2]/div/div[2]/button')).click();
+    await(await this.findByName('nimo-area-code')).click();
+    const areacode = await this.findByXpath(`//div[text()=${process.env.COUNTRY_CODE}]`);
+    await this.driver.executeScript("arguments[0].click();", areacode);
+    const userNameInput = await this.findByName('phone-number-input');
+    const passwordInput = await this.findByXpath('/html/body/div[10]/div/div[2]/div/div[2]/div/div/div[3]/div[1]/div[3]/input');
+    await this.write(userNameInput, process.env.NIMO_USERNAME);
+    await this.s
+    await this.write(passwordInput, process.env.NIMO_PASSWORD);
+    await this.sendEnter();
     while (true) {
-        await (await driver.wait(until.elementLocated(By.className('nimo-bullet-screen__gift-world-banner__open-btn')), Infinity, 'Timed out after 30 seconds', 1000)).click();
-        await driver.switchTo().window((await driver.getAllWindowHandles())[1]);
-        await driver.executeScript(`
+        await (await this.driver.wait(until.elementLocated(By.className('nimo-bullet-screen__gift-world-banner__open-btn')), Infinity, 'Timed out after 30 seconds', 1000)).click();
+        await this.driver.switchTo().window((await driver.getAllWindowHandles())[1]);
+        await this.driver.executeScript(`
         setInterval(() => {
             const modal = document.querySelector('.act-interactive-gift-modal');
             if (modal) {
@@ -92,6 +121,6 @@ profile.setPreference("permissions.default.image", 2) ;
             }
         }, 1000);
         `)
-        await driver.switchTo().window((await driver.getAllWindowHandles())[0]);
+        await this.driver.switchTo().window((await driver.getAllWindowHandles())[0]);
     }
 })();
