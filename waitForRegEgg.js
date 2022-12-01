@@ -102,7 +102,6 @@ profile.setPreference("permissions.default.image", 2) ;
     await this.write(passwordInput, process.env.NIMO_PASSWORD);
     await this.sendEnter();
     while (true) {
-        await this.driver.switchTo().window((await this.driver.getAllWindowHandles())[0]);
         const redEgg = await this.driver.wait(until.elementLocated(By.className('nimo-bullet-screen__gift-world-banner__open-btn')), Infinity, 'Timed out after 30 seconds', 1000);
         await redEgg.click();
         await this.driver.switchTo().window((await this.driver.getAllWindowHandles())[1]);
@@ -122,6 +121,7 @@ profile.setPreference("permissions.default.image", 2) ;
             }
         }, 1000);
         `)
+        await this.driver.switchTo().window((await this.driver.getAllWindowHandles())[0]);
         await this.driver.wait(until.elementIsNotVisible(redEgg));
     }
 })();
