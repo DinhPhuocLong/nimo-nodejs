@@ -122,10 +122,6 @@ profile.setPreference("permissions.default.image", 2) ;
         }, 1000);
         `)
         await this.driver.switchTo().window((await this.driver.getAllWindowHandles())[0]);
-        try {
-            await this.driver.wait(until.elementIsNotVisible(redEgg));
-        } catch (error) {
-            continue;
-        }
+        await this.driver.wait(until.stalenessOf(redEgg));
     }
 })();
