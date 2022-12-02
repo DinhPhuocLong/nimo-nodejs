@@ -97,9 +97,14 @@ profile.setPreference("permissions.default.image", 2) ;
     const areacode = await this.findByXpath(`//div[text()=${process.env.COUNTRY_CODE}]`);
     await this.driver.executeScript("arguments[0].click();", areacode);
     const userNameInput = await this.findByName('phone-number-input');
-    const passwordInput = await this.findByXpath('/html/body/div[10]/div/div[2]/div/div[2]/div/div/div[3]/div[1]/div[3]/input');
+    try {
+        const passwordInput = await this.findByXpath('/html/body/div[10]/div/div[2]/div/div[2]/div/div/div[3]/div[1]/div[3]/input');
+        await this.write(passwordInput, process.env.NIMO_PASSWORD);
+    } catch (error) {
+        const passwordInput = await this.findByXpath('/html/body/div[6]/div/div[2]/div/div[2]/div/div/div[3]/div[1]/div[3]/input');
+        await this.write(passwordInput, process.env.NIMO_PASSWORD);
+    }
     await this.write(userNameInput, process.env.NIMO_USERNAME);
-    await this.write(passwordInput, process.env.NIMO_PASSWORD);
     await this.sendEnter();
     while (true) {
         const redEgg = await this.driver.wait(until.elementLocated(By.className('nimo-bullet-screen__gift-world-banner__open-btn')), Infinity, 'Timed out after 30 seconds', 1000);
