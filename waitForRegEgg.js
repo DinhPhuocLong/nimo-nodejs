@@ -111,20 +111,28 @@ profile.setPreference("permissions.default.image", 2) ;
         await redEgg.click();
         await this.driver.switchTo().window((await this.driver.getAllWindowHandles())[1]);
         await this.driver.executeScript(`
-        setInterval(() => {
-            const modal = document.querySelector('.act-interactive-gift-modal');
-            if (modal) {
-                const iframe = modal.querySelector('iframe');
-                if (iframe) {
+        function redEgg() {
+            setInterval(() => {
+                const modal = document.querySelector('.act-interactive-gift-modal');
+                if (modal) {
+                    const iframe = modal.querySelector('iframe');
+                    if (iframe) {
                     let innerDoc = iframe.contentDocument || iframe.contentWindow.document;
-                    let joinButton = innerDoc.querySelector('.btn');
-                    joinButton.click();
+                        if(innerDoc) {
+                            let joinButton = innerDoc.querySelector('.btn');
+                                if(joinButton) {
+                                    joinButton.click();
+                                    window.close();
+                            }
+                        }
+                    }
+                }
+                } else {
                     window.close();
                 }
-            } else {
-                window.close();
-            }
-        }, 1000);
+            }, 500);
+        }
+        redEgg();
         `)
         await this.driver.switchTo().window((await this.driver.getAllWindowHandles())[0]);
         await this.driver.wait(until.stalenessOf(redEgg));
