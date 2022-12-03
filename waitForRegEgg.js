@@ -126,7 +126,6 @@ profile.setPreference("permissions.default.image", 2) ;
                             }
                         }
                     }
-                }
                 } else {
                     window.close();
                 }
