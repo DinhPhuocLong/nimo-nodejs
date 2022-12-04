@@ -5,7 +5,8 @@ builder.openUrl('https://www.nimo.tv/lives');
 const {
     chooseCountry,
     readLiveUrl,
-    openLiveInNewTab
+    openLiveInNewTab,
+    scroll
 } = require('./function/auto');
 
 (async function () {

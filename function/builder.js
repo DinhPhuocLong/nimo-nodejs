@@ -1,20 +1,61 @@
 const {Builder, By, until, Key} = require('selenium-webdriver');
-const chrome = require('selenium-webdriver/chrome'); 
-let options = new chrome.Options();
-options.addArguments("start-maximized");
-options.addArguments("--js-flags=--expose-gc");
-options.addArguments("--enable-precise-memory-info");
-options.addArguments("--disable-popup-blocking");
-options.addArguments("--disable-default-apps");
-options.addArguments("--disable-infobars");
-// options.addArguments('--no-startup-window');
-// options.setExperimentOption("excludeSwitches")
+const firefox = require('selenium-webdriver/firefox');
+let profile = new firefox.Options();
+profile.setPreference('browser.download.folderList', 1);
+profile.setPreference('browser.download.manager.showWhenStarting', false);
+profile.setPreference('browser.download.manager.focusWhenStarting', false);
+profile.setPreference('browser.download.useDownloadDir', true);
+profile.setPreference('browser.helperApps.alwaysAsk.force', false);
+profile.setPreference('browser.download.manager.alertOnEXEOpen', false);
+profile.setPreference('browser.download.manager.closeWhenDone', true);
+profile.setPreference('browser.download.manager.showAlertOnComplete', false);
+profile.setPreference('browser.download.manager.useWindow', false);
+profile.setPreference('browser.helperApps.neverAsk.saveToDisk', 'application/octet-stream');
+profile.setPreference('permissions.default.stylesheet', 2);
+profile.setPreference('permissions.default.image', 2);
+profile.setPreference('allow_scripts_to_close_windows', true);
+profile.setPreference('dom.allow_scripts_to_close_windows', true);
+profile.setPreference('dom.ipc.plugins.enabled.libflashplayer.so', false);
+profile.setPreference("network.http.pipelining", true);
+profile.setPreference("network.http.proxy.pipelining", true);
+profile.setPreference("network.http.pipelining.maxrequests", 8);
+profile.setPreference("content.notify.interval", 500000);
+profile.setPreference("content.notify.ontimer", true);
+profile.setPreference("content.switch.threshold", 250000);
+profile.setPreference("browser.cache.memory.capacity", 65536);
+profile.setPreference("browser.startup.homepage", "about:blank");
+profile.setPreference("reader.parse-on-load.enabled", false) ;
+profile.setPreference("browser.pocket.enabled", false);
+profile.setPreference("loop.enabled", false);
+profile.setPreference("browser.chrome.toolbar_style", 1);
+profile.setPreference("browser.display.show_image_placeholders", false) ;
+profile.setPreference("browser.display.use_document_colors", false);
+profile.setPreference("browser.display.use_document_fonts", 0);
+profile.setPreference("browser.display.use_system_colors", true);
+profile.setPreference("browser.formfill.enable", false) ;
+profile.setPreference("browser.helperApps.deleteTempFileOnExit", true) ;
+profile.setPreference("browser.shell.checkDefaultBrowser", false);
+profile.setPreference("browser.startup.homepage", "about:blank");
+profile.setPreference("browser.startup.page", 0)  ;
+profile.setPreference("browser.tabs.forceHide", true) ;
+profile.setPreference("browser.urlbar.autoFill", false) ;
+profile.setPreference("browser.urlbar.autocomplete.enabled", false) ;
+profile.setPreference("browser.urlbar.showPopup", false) ;
+profile.setPreference("browser.urlbar.showSearch", false) ;
+profile.setPreference("extensions.checkCompatibility", false)  ;
+profile.setPreference("extensions.checkUpdateSecurity", false);
+profile.setPreference("extensions.update.autoUpdateEnabled", false);
+profile.setPreference("extensions.update.enabled", false);
+profile.setPreference("general.startup.browser", false);
+profile.setPreference("plugin.default_plugin_disabled", false);
+profile.setPreference("permissions.default.image", 2) ;
 
 module.exports = {
     builder: function() {
         this.driver = new Builder()
         .forBrowser('firefox')
-        .build();
+        .setFirefoxOptions(profile)
+        .build()
         this.destroyDriver = async function() {
             return await this.driver.quit();
         }

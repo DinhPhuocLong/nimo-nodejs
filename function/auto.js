@@ -1,11 +1,23 @@
 const builder = require('./builder');
 require('dotenv').config();
+
 const {
     Builder,
     By,
     until,
     Key
 } = require('selenium-webdriver');
+
+
+async function scroll() {
+    let lastHeight = await builder.driver.executeScript("return document.body.scrollHeight");
+    while(true) {
+        await builder.driver.executeScript('window.scrollTo(0, document.body.scrollHeight);');
+        let newHeight = await builder.driver.executeScript('return document.body.scrollHeight');
+        lastHeight = newHeight;
+        if (lastHeight >= 2000) break;
+    }
+}
 
 async function chooseCountry() {
     await builder.driver.manage().window().maximize();
@@ -16,6 +28,7 @@ async function chooseCountry() {
 }
 
 async function readLiveUrl() {
+    // await scroll();
     const liveUrls = [];
     await builder.driver.wait(until.elementLocated(By.css('.nimo-rc_meta__info .controlZindex')), 15000, 'Looking for element');
     const liveElements = await builder.findByCss('.nimo-rc_meta__info .controlZindex');
@@ -26,69 +39,51 @@ async function readLiveUrl() {
 }
 
 async function openLiveInNewTab() {
-    const liveUrls = await readLiveUrl();
+    liveUrls = await readLiveUrl();
     const originalWindow = await builder.driver.getWindowHandle();
     let i = 0;
     while (true) {
-        if ((await builder.driver.getAllWindowHandles()).length < 4) {
+        if ((await builder.driver.getAllWindowHandles()).length < process.env.TAB_QUANTITY) {
             await builder.driver.switchTo().window(originalWindow);
             await builder.driver.switchTo().newWindow('tab');
             await builder.openUrl(liveUrls[i]);
             await checkIfLiveHasEgg();
             i++;
         }
+        console.log(i);
+        if (liveUrls.length == i) {
+            console.log('refresh link');
+            await builder.driver.switchTo().window(originalWindow);
+            await builder.driver.navigate().refresh();
+            liveUrls = await readLiveUrl();
+            i = 0;
+        }
     }
 }
 
 
 async function checkIfLiveHasEgg() {
-    try {
-        await builder.driver.wait(until.elementLocated(By.className('nimo-box-gift__box')), 3000, 'Looking for element');
-        await builder.driver.executeScript(`
+    return await builder.driver.executeScript(`
             function collectEgg() {
+                console.log('==========================');
                 const button = document.querySelector('.pl-icon_danmu_open');
                 if (button) button.click();
-                collectInterval = setInterval(function () {
+                collectInterval = setInterval(function() {
+                    const boxGift = document.querySelector('.nimo-box-gift__box');
                     const collectBtn = document.querySelector('.nimo-box-gift__box__btn');
-                    const redEgg = document.querySelector('.interactive-gift-entry-box-wrap');
-                    if (redEgg) redEgg.click();
-                    let isBoxGift = document.querySelector('.nimo-room__chatroom__box-gift');
+                    let isBoxGift = document.querySelector('.nimo-room__chatroom__box-gift-item');
+                    if (!boxGift) window.close();
                     if (collectBtn) collectBtn.click();
-                    const modal = document.querySelector('.act-interactive-gift-modal');
-                    const container = document.querySelector('.gift-entries-swiper');
-                    const nodeList = container.querySelectorAll('.nimo-room__chatroom__box-gift-item');
-                    const nodeListToArray = [...nodeList];
-                    const ifHasBoxgift = nodeListToArray.some(item => {
-                        const el = item.querySelector('.nimo-box-gift') || item.querySelector('.interactive-gift-entry-box-wrap');
-                        if (el) {
-                            return window.getComputedStyle(el).display == 'block' || window.getComputedStyle(el).display == 'flex'
-                        }
-                    })
-                    if (!ifHasBoxgift) window.close();
-                    if (modal) {
-                        const iframe = modal.querySelector('iframe');
-                        if (iframe) {
-                            let innerDoc = iframe.contentDocument || iframe.contentWindow.document;
-                            if (innerDoc) {
-                                let joinButton = innerDoc.querySelector('.btn');
-                                if (joinButton) {
-                                    joinButton.click();
-                                }
-                            }
-                        }
-                    }
-
+                    if (window.getComputedStyle(isBoxGift).display == 'none') window.close();
                 }, 1);
             }
-            collectEgg(); 
+            setTimeout(collectEgg, 2000);
             `);
-    } catch (error) {
-        await builder.driver.close();
-    }
 }
 
 module.exports = {
     chooseCountry,
     readLiveUrl,
-    openLiveInNewTab
+    openLiveInNewTab,
+    scroll
 }
