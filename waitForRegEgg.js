@@ -131,7 +131,7 @@ profile.setPreference("permissions.default.image", 2) ;
                 }
             }, 500);
         }
-        redEgg();
+        setTimeout(redEgg, ${+process.env.TIME_TO_EXECUTE_SCRIPT}});
         `)
         await this.driver.switchTo().window((await this.driver.getAllWindowHandles())[0]);
         await this.driver.wait(until.stalenessOf(redEgg));
