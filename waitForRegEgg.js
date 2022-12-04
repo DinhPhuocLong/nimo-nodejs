@@ -95,6 +95,7 @@ profile.setPreference("permissions.default.image", 2) ;
     await(await this.findByXpath('/html/body/div[2]/div[1]/div/div[2]/div/div[2]/button')).click();
     await(await this.findByName('nimo-area-code')).click();
     const areacode = await this.findByXpath(`//div[text()=${process.env.COUNTRY_CODE}]`);
+
     await this.driver.executeScript("arguments[0].click();", areacode);
     const userNameInput = await this.findByName('phone-number-input');
     try {
@@ -122,7 +123,9 @@ profile.setPreference("permissions.default.image", 2) ;
                             let joinButton = innerDoc.querySelector('.btn');
                                 if(joinButton) {
                                     joinButton.click();
-                                    window.close();
+                                    setTimeout(() => {
+                                        window.close();
+                                    }, ${process.env.TIME_TO_EXECUTE_SCRIPT});
                             }
                         }
                     }
@@ -131,7 +134,7 @@ profile.setPreference("permissions.default.image", 2) ;
                 }
             }, 500);
         }
-        setTimeout(redEgg, ${+process.env.TIME_TO_EXECUTE_SCRIPT}});
+        
         `)
         await this.driver.switchTo().window((await this.driver.getAllWindowHandles())[0]);
         await this.driver.wait(until.stalenessOf(redEgg));
