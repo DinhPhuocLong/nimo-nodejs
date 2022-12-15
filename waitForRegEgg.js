@@ -116,7 +116,7 @@ profile.setPreference("permissions.default.image", 2) ;
             continue;
         }
         await this.driver.switchTo().window((await this.driver.getAllWindowHandles())[1]);
-        await this.driver.sleep(5000);
+        await this.driver.sleep(+process.env.TIME_TO_EXECUTE_SCRIPT);
         await this.driver.executeScript(`
         function collectEgg() {
         console.log('====');
