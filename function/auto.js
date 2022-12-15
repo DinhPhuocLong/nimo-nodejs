@@ -11,7 +11,7 @@ const {
 
 async function scroll() {
     let lastHeight = await builder.driver.executeScript("return document.body.scrollHeight");
-    while(true) {
+    while (true) {
         await builder.driver.executeScript('window.scrollTo(0, document.body.scrollHeight);');
         let newHeight = await builder.driver.executeScript('return document.body.scrollHeight');
         lastHeight = newHeight;
@@ -28,14 +28,14 @@ async function chooseCountry() {
 }
 
 async function readLiveUrl() {
-    // await scroll();
+    await scroll();
     const liveUrls = [];
     await builder.driver.wait(until.elementLocated(By.css('.nimo-rc_meta__info .controlZindex')), 15000, 'Looking for element');
     const liveElements = await builder.findByCss('.nimo-rc_meta__info .controlZindex');
     for (let live of liveElements) {
         liveUrls.push(await live.getAttribute('href'));
     }
-    return await liveUrls;
+    return liveUrls;
 }
 
 async function openLiveInNewTab() {
@@ -46,15 +46,15 @@ async function openLiveInNewTab() {
         if ((await builder.driver.getAllWindowHandles()).length < process.env.TAB_QUANTITY) {
             await builder.driver.switchTo().window(originalWindow);
             await builder.driver.switchTo().newWindow('tab');
-            await builder.openUrl(liveUrls[i]);
-            await checkIfLiveHasEgg();
+            await builder.openUrl(liveUrls[i]).then(res => {
+                checkIfLiveHasEgg();
+            })
             i++;
         }
-        console.log(i);
         if (liveUrls.length == i) {
-            console.log('refresh link');
             await builder.driver.switchTo().window(originalWindow);
             await builder.driver.navigate().refresh();
+            await scroll();
             liveUrls = await readLiveUrl();
             i = 0;
         }
@@ -63,9 +63,8 @@ async function openLiveInNewTab() {
 
 
 async function checkIfLiveHasEgg() {
-    return await builder.driver.executeScript(`
+    await builder.driver.executeScript(`
             function collectEgg() {
-                console.log('==========================');
                 const button = document.querySelector('.pl-icon_danmu_open');
                 if (button) button.click();
                 collectInterval = setInterval(function() {
@@ -77,7 +76,7 @@ async function checkIfLiveHasEgg() {
                     if (window.getComputedStyle(isBoxGift).display == 'none') window.close();
                 }, 1);
             }
-            setTimeout(collectEgg, 2000);
+            setTimeout(collectEgg, 5000);
             `);
 }
 

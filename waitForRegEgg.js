@@ -108,33 +108,58 @@ profile.setPreference("permissions.default.image", 2) ;
     await this.write(userNameInput, process.env.NIMO_USERNAME);
     await this.sendEnter();
     while (true) {
-        const redEgg = await this.driver.wait(until.elementLocated(By.className('nimo-bullet-screen__gift-world-banner__open-btn')), Infinity, 'Timed out after 30 seconds', 1000);
+        let redEgg = await this.driver.wait(until.elementLocated(By.className('nimo-bullet-screen__gift-world-banner__open-btn')), Infinity, 'Timed out after 30 seconds', 500);
         await redEgg.click();
         await this.driver.switchTo().window((await this.driver.getAllWindowHandles())[1]);
         await this.driver.executeScript(`
-        function redEgg() {
-            setInterval(() => {
+        setTimeout(collectEgg, 4000);
+        function collectEgg() {
+        const button = document.querySelector('.pl-icon_danmu_open');
+        if (button) button.click();
+        let flag = true;
+        collectInterval = setInterval(function () {
+                const collectBtn = document.querySelector('.nimo-box-gift__box__btn');
+                const redEgg = document.querySelector('.interactive-gift-entry-box-wrap');
+                if (redEgg) redEgg.click();
+                let isBoxGift = document.querySelector('.nimo-room__chatroom__box-gift');
+                if (collectBtn) collectBtn.click();
                 const modal = document.querySelector('.act-interactive-gift-modal');
+                const container = document.querySelector('.gift-entries-swiper');
+                if (container) {
+                    const nodeList = container.querySelectorAll('.nimo-room__chatroom__box-gift-item');
+                    const nodeListToArray = [...nodeList];
+                    const ifHasBoxgift = nodeListToArray.some(item => {
+                        const el = item.querySelector('.nimo-box-gift') || item.querySelector('.interactive-gift-entry-box-wrap');
+                        if (el) {
+                            return window.getComputedStyle(el).display == 'block' || window.getComputedStyle(el).display == 'flex'
+                        }
+                    })
+                    if (!ifHasBoxgift) window.close();
+                }
                 if (modal) {
                     const iframe = modal.querySelector('iframe');
                     if (iframe) {
-                    let innerDoc = iframe.contentDocument || iframe.contentWindow.document;
-                        if(innerDoc) {
+                        let innerDoc = iframe.contentDocument || iframe.contentWindow.document;
+                        if (innerDoc && flag == true) {
                             let joinButton = innerDoc.querySelector('.btn');
-                                if(joinButton) {
-                                    joinButton.click();
-                                    setTimeout(() => {
-                                        window.close();
-                                    }, ${process.env.TIME_TO_EXECUTE_SCRIPT});
+                            if (joinButton) {
+                                joinButton.click();
+                                flag = false;
+                            }
+                            let result = innerDoc.querySelector('.ig-result');
+                            console.log('closeing');
+                                if (result) {
+                                    flag = true;
+                                    let close = innerDoc.querySelector('.act-interactive-gift-modal-close');
+                                    if (close) {
+                                        close.click();
+                                    }
+                                }
                             }
                         }
                     }
-                } else {
-                    window.close();
-                }
-            }, 500);
+                }, 1);
         }
-        redEgg();
         `)
         
         await this.driver.switchTo().window((await this.driver.getAllWindowHandles())[0]);
