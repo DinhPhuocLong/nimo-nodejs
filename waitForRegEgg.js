@@ -111,8 +111,8 @@ profile.setPreference("permissions.default.image", 2) ;
         let redEgg = await this.driver.wait(until.elementLocated(By.className('nimo-bullet-screen__gift-world-banner__open-btn')), Infinity, 'Timed out after 30 seconds', 500);
         await redEgg.click();
         await this.driver.switchTo().window((await this.driver.getAllWindowHandles())[1]);
+        await this.driver.sleep(5000);
         await this.driver.executeScript(`
-        setTimeout(collectEgg, 4000);
         function collectEgg() {
         const button = document.querySelector('.pl-icon_danmu_open');
         if (button) button.click();
@@ -160,6 +160,7 @@ profile.setPreference("permissions.default.image", 2) ;
                     }
                 }, 1);
         }
+        collectEgg();
         `)
         
         await this.driver.switchTo().window((await this.driver.getAllWindowHandles())[0]);
